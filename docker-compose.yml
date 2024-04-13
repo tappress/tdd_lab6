@@ -1,0 +1,71 @@
+name: tdd_lab6
+
+services:
+  web:
+    container_name: tdd_lab6.web
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+    volumes:
+      - ./src:/tdd_lab6/src
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    container_name: tdd_lab6.mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - tdd_lab6.mongodata:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 3s
+      timeout: 2s
+      retries: 5
+      start_period: 4s
+    command:
+      - '--logpath'
+      - '/var/log/mongodb/mongod.log'
+
+  testrunner:
+    container_name: tdd_lab6.testrunner
+    profiles:
+      - test
+    build:
+      context: .
+      dockerfile: docker/testrunner/Dockerfile
+    volumes:
+      - ./src:/tdd_lab6/src
+      - ./tests:/tdd_lab6/tests
+    env_file:
+      - test.env
+    depends_on:
+      test_mongo:
+        condition: service_healthy
+
+  test_mongo:
+    container_name: tdd_lab6.test_mongo
+    image: mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - tdd_lab6.test_mongodata:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 3s
+      timeout: 2s
+      retries: 5
+      start_period: 4s
+    command:
+      - '--logpath'
+      - '/var/log/mongodb/mongod.log'
+
+volumes:
+  tdd_lab6.mongodata: { }
+  tdd_lab6.test_mongodata: { }
