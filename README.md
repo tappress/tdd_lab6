@@ -1,4 +1,4 @@
-# TDD lab4 + 5
+# TDD lab6
 
 ## Run tests
 
