@@ -13,9 +13,3 @@ docker compose build testrunner
 ```shell
 docker compose run testrunner
 ```
-
-### Test results
-
-15 tests in total
-
-![Test Results](./test_results.png)
